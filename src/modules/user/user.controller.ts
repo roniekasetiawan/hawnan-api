@@ -1,82 +1,78 @@
-import type { Context } from 'hono'
-import { createUserSchema, updateUserSchema } from './user.schema'
-import { userService, UserNotFoundError } from './user.service'
+import type { AppContext } from '@/app';
+import { createUserSchema, updateUserSchema } from '@/modules/user/user.schema';
+import { userService } from '@/modules/user/user.service';
+import { ResponseBuilder } from '@/core/http/response';
 
 export const userController = {
-  async getAll(c: Context) {
-    const users = await userService.getAll()
-    return c.json({ data: users })
+  async getAll(c: AppContext) {
+    const users = await userService.listUsers();
+    return ResponseBuilder.Success({
+      c,
+      data: users,
+    });
   },
 
-  async getById(c: Context) {
-    const id = c.req.param('id')
-
-    try {
-      const user = await userService.getById(id)
-      return c.json({ data: user })
-    } catch (err) {
-      if (err instanceof UserNotFoundError) {
-        return c.json({ error: err.message }, 404)
-      }
-      throw err
-    }
+  async getById(c: AppContext) {
+    const id = c.req.param('id');
+    const user = await userService.getUserById(id);
+    return ResponseBuilder.Success({
+      c,
+      data: user,
+    });
   },
 
-  async create(c: Context) {
-    const body = await c.req.json().catch(() => null)
+  async create(c: AppContext) {
+    const body = await c.req.json().catch(() => null);
 
-    const parsed = createUserSchema.safeParse(body)
+    const parsed = createUserSchema.safeParse(body);
     if (!parsed.success) {
-      return c.json(
-        {
-          error: 'Body tidak valid',
-          details: parsed.error.flatten(),
-        },
-        400,
-      )
+      return ResponseBuilder.Error({
+        c,
+        message: 'Body tidak valid',
+        status: 400,
+        data: parsed.error.flatten(),
+      });
     }
 
-    const user = await userService.create(parsed.data)
-    return c.json({ data: user }, 201)
+    const user = await userService.registerUser(parsed.data);
+    return ResponseBuilder.Success({
+      c,
+      data: user,
+      message: 'User created',
+      status: 201,
+    });
   },
 
-  async update(c: Context) {
-    const id = c.req.param('id')
-    const body = await c.req.json().catch(() => null)
+  async update(c: AppContext) {
+    const id = c.req.param('id');
+    const body = await c.req.json().catch(() => null);
 
-    const parsed = updateUserSchema.safeParse(body)
+    const parsed = updateUserSchema.safeParse(body);
     if (!parsed.success) {
-      return c.json(
-        {
-          error: 'Body tidak valid',
-          details: parsed.error.flatten(),
-        },
-        400,
-      )
+      return ResponseBuilder.Error({
+        c,
+        message: 'Body tidak valid',
+        status: 400,
+        data: parsed.error.flatten(),
+      });
     }
 
-    try {
-      const user = await userService.update(id, parsed.data)
-      return c.json({ data: user })
-    } catch (err) {
-      if (err instanceof UserNotFoundError) {
-        return c.json({ error: err.message }, 404)
-      }
-      throw err
-    }
+    const user = await userService.updateUserProfile(id, parsed.data);
+    return ResponseBuilder.Success({
+      c,
+      data: user,
+      message: 'User updated',
+    });
   },
 
-  async delete(c: Context) {
-    const id = c.req.param('id')
+  async delete(c: AppContext) {
+    const id = c.req.param('id');
 
-    try {
-      await userService.delete(id)
-      return c.json({ message: 'User berhasil dihapus' })
-    } catch (err) {
-      if (err instanceof UserNotFoundError) {
-        return c.json({ error: err.message }, 404)
-      }
-      throw err
-    }
+    await userService.deleteUser(id);
+    return ResponseBuilder.Success({
+      c,
+      data: null,
+      message: 'User deleted',
+    });
   },
-}
+};

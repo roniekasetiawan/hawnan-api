@@ -1,42 +1,65 @@
-import { userRepository } from './user.repository'
-import type { CreateUserInput, UpdateUserInput } from './user.schema'
-
-export class UserNotFoundError extends Error {
-  constructor() {
-    super('User tidak ditemukan')
-  }
-}
+import { userRepository } from '@/modules/user/user.repository';
+import type { CreateUserInput, UpdateUserInput } from '@/modules/user/user.schema';
+import { UserAlreadyExistsError, UserNotFoundError } from '@/modules/user/user.errors';
+import {
+  applyUserProfileUpdate,
+  buildNewUserProps,
+  normalizeEmail,
+} from '@/modules/user/user.domain';
 
 export const userService = {
-  async getAll() {
-    return userRepository.findAll()
+  async listUsers() {
+    return userRepository.findAll();
   },
 
-  async getById(id: string) {
-    const user = await userRepository.findById(id)
+  async getUserById(id: string) {
+    const user = await userRepository.findById(id);
     if (!user) {
-      throw new UserNotFoundError()
+      throw new UserNotFoundError(id);
     }
-    return user
+    return user;
   },
 
-  async create(payload: CreateUserInput) {
-    return userRepository.create(payload)
+  async registerUser(input: CreateUserInput) {
+    const props = buildNewUserProps(input);
+
+    const existing = await userRepository.findByEmail(normalizeEmail(input.email));
+    if (existing) {
+      throw new UserAlreadyExistsError(input.email);
+    }
+
+    return userRepository.create(props);
   },
 
-  async update(id: string, payload: UpdateUserInput) {
-    const existing = await userRepository.findById(id)
+  async updateUserProfile(id: string, input: UpdateUserInput) {
+    const existing = await userRepository.findById(id);
     if (!existing) {
-      throw new UserNotFoundError()
+      throw new UserNotFoundError(id);
     }
-    return userRepository.update(id, payload)
+
+    const currentProps = {
+      email: existing.email,
+      name: existing.name ?? null,
+    };
+
+    const nextProps = applyUserProfileUpdate(currentProps, input);
+
+    if (nextProps.email !== currentProps.email) {
+      const conflict = await userRepository.findByEmail(nextProps.email);
+      if (conflict && conflict.id !== id) {
+        throw new UserAlreadyExistsError(nextProps.email);
+      }
+    }
+
+    return userRepository.update(id, nextProps);
   },
 
-  async delete(id: string) {
-    const existing = await userRepository.findById(id)
+  async deleteUser(id: string) {
+    const existing = await userRepository.findById(id);
     if (!existing) {
-      throw new UserNotFoundError()
+      throw new UserNotFoundError(id);
     }
-    await userRepository.delete(id)
+
+    await userRepository.delete(id);
   },
-}
+};
