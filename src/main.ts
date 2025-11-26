@@ -4,6 +4,6 @@ import { env } from './config/env';
 const app = createApp();
 
 export default {
-    port: env.PORT,
+    port: env.app.port,
     fetch: app.fetch,
 };

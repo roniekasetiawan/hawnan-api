@@ -1,34 +1,239 @@
-# Proprietary License (All Rights Reserved)
+# HAWNAN API
 
-**Copyright (c) 2025 Roni Eka Setiawan.  
-All rights reserved.**
+Hawnan API adalah backend **modular monolith** yang dibangun dengan **Bun** dan **Hono** untuk ekosistem _Masjid Sejuta Pemuda_, meliputi:
 
-This software and its source code are proprietary and confidential.
+- Fundraising (wakaf, donasi, infaq, zakat)
+- Dompet digital **MSPay** (topup, payment, subscription)
+- Fitur Qur'an & ibadah (Qur'an digital, jadwal salat, target ibadah)
+- Event & ticketing pemuda
+- Ekosistem sosial & marketplace pemuda
+- Gamification (poin, leveling, leaderboard)
 
-## Restrictions
+> ⚠️ **Catatan:** Codebase ini bersifat **proprietary** dan tidak boleh digunakan kembali tanpa izin tertulis.
 
-Unless you have received explicit written permission from the copyright owner, **you are NOT allowed to**:
+---
 
-- Use this software or any part of its source code in any other project, product, or service
-- Copy, reproduce, or redistribute this software or any portion of it
-- Modify, adapt, translate, or create derivative works based on this software
-- Publish, sublicense, sell, or otherwise transfer any rights to this software
-- Remove or alter any copyright, trademark, or proprietary notices
+## 🚀 Tech Stack
 
-Any unauthorized use, copying, modification, or distribution of this software, or any portion of it, is strictly prohibited and may result in civil and/or criminal penalties.
+- **Runtime:** Bun
+- **Framework:** Hono
+- **Language:** TypeScript
+- **Architecture:** Modular Monolith / Domain-driven structure
+- **ORM:** Prisma ORM v7 (menggunakan prisma.config.ts)
+- **Database:** PostgreSQL
+- **Cache / Queue:** Redis
+- **Object Storage:** MinIO
+- **Payment Gateway:** Xendit
+- **Other Tools:** ESLint, Prettier, Husky, Commitlint, Docker, Bun test (coming soon)
 
-## Permitted Use
+---
 
-You may:
+## 📂 Struktur Project (High Level)
 
-- View and review the source code in this repository for internal, non-commercial evaluation purposes only
-- Run the software locally for development and testing **within the Hawnan project scope** (as authorized by the owner)
+```
+src/
+├── app/          # Bootstrap Hono app, middleware global, route registry
+├── config/       # Environment, logger, konfigurasi umum
+├── core/         # Core engine (wallet, ledger, payments, events, gamification)
+├── infra/        # Prisma client, PostgreSQL, Redis, MinIO, Queue, Observability
+├── modules/      # Domain modules (auth, fundraising, worship, social, market, dll)
+├── websocket/    # WebSocket server & channels
+└── workers/      # Background jobs, cron, EOD recon
+```
 
-No other rights or licenses, whether express or implied, are granted.
+---
 
-## Contact
+## 🛠 Development Setup
 
-For licensing inquiries, partnership, or commercial use, please contact:
+### 1. Prasyarat
 
-**Roni Eka Setiawan**  
-roniekasetiawan1@gmail.com
+Pastikan telah menginstal:
+
+- Bun → https://bun.sh
+- Git
+- Docker (opsional untuk local services)
+- Node.js (opsional untuk tooling tertentu)
+
+---
+
+### 2. Install Dependencies
+
+```
+bun install
+```
+
+---
+
+### 3. Menjalankan Server (Development)
+
+```
+bun run dev
+```
+
+Atau langsung:
+
+```
+bun run src/main.ts
+```
+
+Server berjalan pada:
+
+```
+http://localhost:8080
+```
+
+Cek health endpoint:
+
+```
+curl http://localhost:8080/health
+```
+
+---
+
+## 🧩 Prisma ORM (v7)
+
+Project ini menggunakan **Prisma ORM v7** dengan arsitektur baru:
+
+- Tidak menggunakan `url = env("DATABASE_URL")` di `schema.prisma`
+- URL koneksi didefinisikan melalui **prisma.config.ts**
+- Prisma Client di-*generate* ke folder khusus, bukan `@prisma/client`
+
+### 📁 Struktur Prisma
+
+```
+prisma/
+├── schema.prisma
+├── prisma.config.ts
+└── migrations/
+```
+
+### ⚙️ Contoh schema.prisma
+
+```
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallets   Wallet[]
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  balance   BigInt   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+### ⚙️ Contoh prisma.config.ts
+
+```
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
+import path from 'node:path'
+
+export default defineConfig({
+  schema: path.join('prisma', 'schema.prisma'),
+  migrations: {
+    path: path.join('prisma', 'migrations'),
+  },
+  datasource: {
+    url: env('DATABASE_URL'),
+  },
+})
+```
+
+### 🔧 Generate Prisma Client
+
+```
+bunx --bun prisma generate
+```
+
+### 🗂 Migrasi Database
+
+```
+bunx --bun prisma migrate dev --name init
+```
+
+### 📦 Menggunakan PrismaClient
+
+```
+import { PrismaClient } from '../generated/prisma-client'
+
+export const prisma = new PrismaClient()
+```
+
+> ```
+> /generated
+> ```
+
+---
+
+## 📜 Scripts
+
+```
+bun run dev               # Development server
+bun run start             # Start server tanpa watch
+bun run lint              # Lint seluruh kode
+bun run lint:fix          # ESLint auto-fix
+```
+
+---
+
+## 🧹 Code Style & Linting
+
+Project ini menggunakan:
+
+- **ESLint** (`.eslintrc.cjs`)
+- **Prettier** (`prettier.config.cjs`)
+- **Husky** + **lint-staged**
+- **Commitlint** (`commitlint.config.cjs`)
+
+### Format Commit (Conventional Commits)
+
+- `feat: add wallet manager`
+- `fix: handle xendit callback error`
+- `refactor: improve donation service`
+- `chore: setup prisma config`
+
+---
+
+## 🧪 Testing (Coming Soon)
+
+- Unit tests (Bun test / Vitest)
+- Integration tests
+- E2E tests (Postman/Newman atau k6)
+
+---
+
+## 🐳 Docker (Coming Soon)
+
+`docker-compose.yml` (plan):
+
+- API service
+- PostgreSQL
+- Redis
+- MinIO
+- Loki / Grafana untuk observability
+
+---
+
+## 🔐 License
+
+Repository ini berada di bawah **Proprietary License (All Rights Reserved)**.  
+Penggunaan, penyalinan, modifikasi, distribusi, atau eksploitasi komersial **dilarang** tanpa izin tertulis dari pemilik hak cipta.
+

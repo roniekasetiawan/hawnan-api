@@ -7,8 +7,25 @@ function required(name: string): string {
 }
 
 export const env = {
-    NODE_ENV: process.env.NODE_ENV ?? 'development',
-    PORT: Number(process.env.PORT ?? '8080'),
-    DATABASE_URL: process.env.DATABASE_URL ?? '',
-    XENDIT_API_KEY: process.env.XENDIT_API_KEY ?? '',
-};
+  app: {
+    port: Number(process.env.APP_PORT ?? 3000),
+    env: process.env.APP_ENV ?? 'local',
+  },
+  db: {
+    host: process.env.DB_HOST ?? 'localhost',
+    port: Number(process.env.DB_PORT ?? 5432),
+    user: process.env.DB_USER ?? 'hawnan',
+    password: process.env.DB_PASSWORD ?? 'hawnan_password',
+    name: process.env.DB_NAME ?? 'hawnan_db',
+  },
+  redis: {
+    host: process.env.REDIS_HOST ?? 'localhost',
+    port: Number(process.env.REDIS_PORT ?? 6379),
+  },
+  minio: {
+    endpoint: process.env.MINIO_ENDPOINT ?? 'http://localhost:9000',
+    accessKey: process.env.MINIO_ACCESS_KEY ?? 'minioadmin',
+    secretKey: process.env.MINIO_SECRET_KEY ?? 'minioadmin123',
+    bucket: process.env.MINIO_BUCKET ?? 'uploads',
+  },
+}

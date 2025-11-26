@@ -12,3 +12,5 @@ yarn-error.log*
 
 .idea
 .jetbrains
+
+/src/generated/prisma

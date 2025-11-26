@@ -1,9 +1,5 @@
-import { Hono } from 'hono';
+import { Hono } from 'hono'
 
-export function pingRoutes() {
-    const app = new Hono();
+export const pingRoutes = new Hono()
 
-    app.get('/ping', (c) => c.json({ message: 'pong' }));
-
-    return app;
-}
+pingRoutes.get('/ping', (c) => c.json({ message: 'pong' }))
