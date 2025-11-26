@@ -1,10 +1,10 @@
-import { ConsoleLogger } from "./impl/console.ts";
+import { ConsoleLogger } from './impl/console';
 
 export interface Logger {
-  info: ({ tag, message, error }: { tag?: string, message?: string, error?: Error }) => void
-  error: ({ tag, message, error }: { tag?: string, message?: string, error?: Error }) => void
-  debug: ({ tag, message, error }: { tag?: string, message?: string, error?: Error }) => void
-  warn: ({ tag, message, error }: { tag?: string, message?: string, error?: Error }) => void
+  info: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
+  error: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
+  debug: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
+  warn: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
 }
 
 export interface Config {
@@ -18,18 +18,21 @@ export enum LogFormat {
 }
 
 export enum LogLevel {
-  INFO = "info", ERROR = "error", DEBUG = "debug", WARN = "warn"
+  INFO = 'info',
+  ERROR = 'error',
+  DEBUG = 'debug',
+  WARN = 'warn',
 }
 
 export enum LogImpls {
-  CONSOLE="console",
+  CONSOLE = 'console',
 }
 
-export function InitLogger({ impl, config }: { impl: LogImpls, config: Config }): Logger {
+export function InitLogger({ impl, config }: { impl: LogImpls; config: Config }): Logger {
   switch (impl) {
     case LogImpls.CONSOLE:
-      return new ConsoleLogger(config)
+      return new ConsoleLogger(config);
     default:
-    throw new Error(`logger implementation of ${impl} not implementated yet!`)
+      throw new Error(`logger implementation of ${impl} not implementated yet!`);
   }
 }
