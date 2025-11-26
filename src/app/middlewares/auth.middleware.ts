@@ -1,33 +1,28 @@
-import type { Next } from 'hono'
-import { HTTPException } from 'hono/http-exception'
-import type { AppContext } from '@/app'
+import type { MiddlewareHandler } from 'hono';
+import { ResponseBuilder } from '@/core/http/response';
+import { verify } from 'hono/jwt';
 
-function verifyToken(token: string) {
-  const [userId, role] = token.split(':')
-  if (!userId) throw new Error('invalid token')
-  return {
-    userId,
-    role: (role as 'admin' | 'member' | 'guest') || 'member',
-  }
-}
+export const authMiddleware: MiddlewareHandler = async (c, next) => {
+  const authHeader = c.req.header('authorization') ?? '';
 
-export async function authMiddleware(c: AppContext, next: Next) {
-  const authHeader = c.req.header('authorization')
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new HTTPException(401, { message: 'Missing or invalid Authorization header' })
+  if (!authHeader.startsWith('Bearer ')) {
+    return ResponseBuilder.Error({ c, message: 'Missing or invalid token', status: 401 });
   }
 
-  const token = authHeader.slice('Bearer '.length).trim()
+  const token = authHeader.slice(7);
 
   try {
-    const payload = verifyToken(token)
+    const payload = await verify(token, c.env.JWT_SECRET);
 
-    c.set('userId', payload.userId)
-    c.set('userRole', payload.role)
+    c.set('user', {
+      id: String(payload.sub),
+      email: String(payload.email),
+      roles: Array.isArray(payload.roles) ? payload.roles : [],
+    });
 
-    await next()
+    await next();
   } catch (err) {
-    throw new HTTPException(401, { message: 'Invalid token' })
+    console.error('JWT verification failed:', err);
+    return ResponseBuilder.Error({ c, message: 'Invalid or expired token', status: 401 });
   }
-}
+};

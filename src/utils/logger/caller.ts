@@ -31,7 +31,13 @@ export const getCaller = async (error: Error | undefined | null): Promise<Caller
     return empty
   }
 
-  const filePath = match[1] ?? ""
+  let filePath = match[1] ?? ""
+  const srcMarker = '/src/';
+  const srcIndex = filePath.indexOf(srcMarker);
+  if (srcIndex !== -1) {
+    filePath = filePath.substring(srcIndex + srcMarker.length);
+  }
+  
   const line = match[2] ? (parseInt(match[2], 10) + 1) : -1
   return { filePath, line } as Caller
 }
