@@ -12,7 +12,7 @@ export type CreateUserInput = {
 export type UpdateUserInput = Partial<CreateUserInput>;
 
 export const createUserSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: z.email('Invalid email format'),
   name: z.string().max(100).nullable().optional(),
 }) satisfies z.ZodType<CreateUserInput>;
 
