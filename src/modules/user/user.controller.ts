@@ -2,22 +2,25 @@ import type { AppContext } from '@/app';
 import { createUserSchema, updateUserSchema } from '@/modules/user/user.schema';
 import { userService } from '@/modules/user/user.service';
 import { ResponseBuilder } from '@/core/http/response';
+import { toUserPublicDto, toUserPublicList } from '@/modules/user/user.presenter';
 
 export const userController = {
   async getAll(c: AppContext) {
     const users = await userService.listUsers();
+    const dto = toUserPublicList(users);
     return ResponseBuilder.Success({
       c,
-      data: users,
+      data: dto,
     });
   },
 
   async getById(c: AppContext) {
     const id = c.req.param('id');
     const user = await userService.getUserById(id);
+    const dto = toUserPublicDto(user);
     return ResponseBuilder.Success({
       c,
-      data: user,
+      data: dto,
     });
   },
 
@@ -35,9 +38,11 @@ export const userController = {
     }
 
     const user = await userService.registerUser(parsed.data);
+    const dto = toUserPublicDto(user);
+
     return ResponseBuilder.Success({
       c,
-      data: user,
+      data: dto,
       message: 'User created',
       status: 201,
     });
@@ -58,9 +63,11 @@ export const userController = {
     }
 
     const user = await userService.updateUserProfile(id, parsed.data);
+    const dto = toUserPublicDto(user);
+
     return ResponseBuilder.Success({
       c,
-      data: user,
+      data: dto,
       message: 'User updated',
     });
   },
