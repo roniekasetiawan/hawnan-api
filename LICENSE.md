@@ -1,6 +1,6 @@
 # Proprietary License (All Rights Reserved)
 
-**Copyright (c) 2025 Ronie Kasetiawan.  
+**Copyright (c) 2025 Roni Eka Setiawan.  
 All rights reserved.**
 
 This software and its source code are proprietary and confidential.
