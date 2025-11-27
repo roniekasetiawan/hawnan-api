@@ -1,4 +1,4 @@
-import { ConsoleLogger } from './impl/console';
+import { ConsoleLogger } from "@/utils/logger/impl/console"
 
 export interface Logger {
   info: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
@@ -25,7 +25,7 @@ export enum LogLevel {
 }
 
 export enum LogImpls {
-  CONSOLE = 'console',
+  CONSOLE = "console",
 }
 
 export function InitLogger({ impl, config }: { impl: LogImpls; config: Config }): Logger {
