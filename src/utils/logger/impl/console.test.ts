@@ -1,5 +1,5 @@
-import { LogFormat, type Config } from '../logger';
-import { ConsoleLogger } from './console';
+import { ConsoleLogger } from '@/utils/logger/impl/console';
+import { LogFormat, Config } from '@/utils/logger/logger';
 
 describe('console logger', async () => {
   let log: ConsoleLogger;
