@@ -1,3 +1,5 @@
+import RedisImpl from "@/utils/caches/driver/redis"
+
 export type CacheKey = string
 export enum CacheDrivers {
   REDIS
@@ -26,7 +28,7 @@ export interface Cache {
 export function InitCache({ config }: { config: CacheConfig }): { data?: Cache, error?: Error } {
   switch (config.driver) {
     case CacheDrivers.REDIS:
-      return { data: undefined }
+      return { data: new RedisImpl({ config }) }
     default:
       return { error: new Error(`cache driver ${config.driver} not implemented!`) }
   }
