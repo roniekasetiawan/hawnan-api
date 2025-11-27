@@ -2,7 +2,7 @@ import RedisImpl from "@/utils/caches/driver/redis"
 
 export type CacheKey = string
 export enum CacheDrivers {
-  REDIS
+  REDIS = "redis"
   // others...
 }
 
