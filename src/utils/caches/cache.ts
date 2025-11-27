@@ -25,11 +25,11 @@ export interface Cache {
   del({ keys }: { keys: CacheKey[] }): { err?: Error } | Promise<{ err?: Error }>
 }
 
-export function InitCache({ config }: { config: CacheConfig }): { data?: Cache, error?: Error } {
+export function InitCache({ config }: { config: CacheConfig }): { data?: Cache, err?: Error } {
   switch (config.driver) {
     case CacheDrivers.REDIS:
       return { data: new RedisImpl({ config }) }
     default:
-      return { error: new Error(`cache driver ${config.driver} not implemented!`) }
+      return { err: new Error(`cache driver ${config.driver} not implemented!`) }
   }
 }

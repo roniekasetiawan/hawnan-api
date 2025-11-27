@@ -1,10 +1,10 @@
 import { ConsoleLogger } from "@/utils/logger/impl/console"
 
 export interface Logger {
-  info: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
-  error: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
-  debug: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
-  warn: ({ tag, message, error }: { tag?: string; message?: string; error?: Error }) => void;
+  info: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
+  error: ({ tag, message, err }: { tag?: string; message?: string; err?: Error }) => void;
+  debug: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
+  warn: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
 }
 
 export interface Config {

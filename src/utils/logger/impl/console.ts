@@ -30,58 +30,58 @@ export class ConsoleLogger implements Logger {
   async info({
     tag,
     message,
-    error = new Error(),
+    err = new Error(),
   }: {
     tag?: string;
     message?: string;
-    error?: Error;
+    err?: Error;
   }) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.INFO))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.INFO, message, caller: await getCaller(error) }));
+    console.log(this.fmt({ tag, level: LogLevel.INFO, message, caller: await getCaller(err) }));
   }
 
   async error({
     tag,
     message,
-    error = new Error(),
+    err  = new Error(),
   }: {
     tag?: string;
     message?: string;
-    error?: Error;
+    err?: Error;
   }) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.ERROR))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.ERROR, message, caller: await getCaller(error) }));
+    console.log(this.fmt({ tag, level: LogLevel.ERROR, message, caller: await getCaller(err) }));
   }
   async debug({
     tag,
     message,
-    error = new Error(),
+    err = new Error(),
   }: {
     tag?: string;
     message?: string;
-    error?: Error;
+    err?: Error;
   }) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.DEBUG))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.DEBUG, message, caller: await getCaller(error) }));
+    console.log(this.fmt({ tag, level: LogLevel.DEBUG, message, caller: await getCaller(err) }));
   }
   async warn({
     tag,
     message,
-    error = new Error(),
+    err = new Error(),
   }: {
     tag?: string;
     message?: string;
-    error?: Error;
+    err?: Error;
   }) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.WARN))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.WARN, message, caller: await getCaller(error) }));
+    console.log(this.fmt({ tag, level: LogLevel.WARN, message, caller: await getCaller(err) }));
   }
 }

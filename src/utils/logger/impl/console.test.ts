@@ -12,19 +12,19 @@ describe("console logger", async () => {
   })
 
   test("info: should print log with info level", async () => {
-    log.info({ message: "Hello World", error: new Error() })
+    log.info({ message: "Hello World", err: new Error() })
   })
 
   test("warn: should print log with warn level", async () => {
-    log.warn({ message: "Hello World", error: new Error() })
+    log.warn({ message: "Hello World", err: new Error() })
   })
 
   test("debug: should print log with debug level", async () => {
-    log.debug({ message: "Hello World", error: new Error() })
+    log.debug({ message: "Hello World", err: new Error() })
   })
 
   test("error: should print log with error level", async () => {
-    log.error({ message: "Hello World", error: new Error() })
+    log.error({ message: "Hello World", err: new Error() })
   })
 
 })
