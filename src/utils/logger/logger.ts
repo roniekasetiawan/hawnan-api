@@ -1,10 +1,10 @@
-import { ConsoleLogger } from "@/utils/logger/impl/console"
+import { ConsoleLogger } from '@/utils/logger/impl/console';
 
 export interface Logger {
-  info: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
+  info: ({ tag, message, err }: { tag?: string; message?: string; err?: Error }) => void;
   error: ({ tag, message, err }: { tag?: string; message?: string; err?: Error }) => void;
-  debug: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
-  warn: ({ tag, message, err  }: { tag?: string; message?: string; err?: Error }) => void;
+  debug: ({ tag, message, err }: { tag?: string; message?: string; err?: Error }) => void;
+  warn: ({ tag, message, err }: { tag?: string; message?: string; err?: Error }) => void;
 }
 
 export interface Config {
@@ -25,7 +25,7 @@ export enum LogLevel {
 }
 
 export enum LogImpls {
-  CONSOLE = "console",
+  CONSOLE = 'console',
 }
 
 export function InitLogger({ impl, config }: { impl: LogImpls; config: Config }): Logger {
