@@ -4,40 +4,40 @@ export interface Caller {
 }
 
 export const getCaller = async (error: Error | undefined | null): Promise<Caller> => {
-  const empty = { filePath: "", line: -1 } as Caller
+  const empty = { filePath: '', line: -1 } as Caller;
   if (!error) {
-    return empty
+    return empty;
   }
 
   // get property string
-  const stack = error.stack
+  const stack = error.stack;
   if (!stack) {
-    return empty
+    return empty;
   }
 
   // split the lines
-  const lines = stack.split('\n')
+  const lines = stack.split('\n');
 
   // catch the line function outside getCaller()
-  const fn = lines[2]
+  const fn = lines[2];
 
   // extract file path and line number
   const match = fn.match(/\(([^:]+):(\d+):\d+\)/);
   if (!match) {
-    return empty
+    return empty;
   }
 
   if (match.length < 2) {
-    return empty
+    return empty;
   }
 
-  let filePath = match[1] ?? ""
+  let filePath = match[1] ?? '';
   const srcMarker = '/src/';
   const srcIndex = filePath.indexOf(srcMarker);
   if (srcIndex !== -1) {
     filePath = filePath.substring(srcIndex + srcMarker.length);
   }
-  
-  const line = match[2] ? (parseInt(match[2], 10) + 1) : -1
-  return { filePath, line } as Caller
-}
+
+  const line = match[2] ? parseInt(match[2], 10) + 1 : -1;
+  return { filePath, line } as Caller;
+};
