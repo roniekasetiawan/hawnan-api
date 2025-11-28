@@ -1,28 +1,34 @@
 import type { AppContext } from '@/app';
 import { createUserSchema, updateUserSchema } from '@/modules/user/user.schema';
-import { userService } from '@/modules/user/user.service';
+import { UserService } from '@/modules/user/user.service';
 import { ResponseBuilder } from '@/core/http/response';
 import { toUserPublicDto, toUserPublicList } from '@/modules/user/user.presenter';
 
-export const userController = {
+export class UserController {
+  private userService: UserService;
+
+  constructor({ userService }: { userService: UserService }) {
+    this.userService = userService;
+  }
+
   async getAll(c: AppContext) {
-    const users = await userService.listUsers();
+    const users = await this.userService.listUsers();
     const dto = toUserPublicList(users);
     return ResponseBuilder.Success({
       c,
       data: dto,
     });
-  },
+  }
 
   async getById(c: AppContext) {
     const id = c.req.param('id');
-    const user = await userService.getUserById(id);
+    const user = await this.userService.getUserById(id);
     const dto = toUserPublicDto(user);
     return ResponseBuilder.Success({
       c,
       data: dto,
     });
-  },
+  }
 
   async create(c: AppContext) {
     const body = await c.req.json().catch(() => null);
@@ -37,7 +43,7 @@ export const userController = {
       });
     }
 
-    const user = await userService.registerUser(parsed.data);
+    const user = await this.userService.registerUser(parsed.data);
     const dto = toUserPublicDto(user);
 
     return ResponseBuilder.Success({
@@ -46,7 +52,7 @@ export const userController = {
       message: 'User created',
       status: 201,
     });
-  },
+  }
 
   async update(c: AppContext) {
     const id = c.req.param('id');
@@ -62,7 +68,7 @@ export const userController = {
       });
     }
 
-    const user = await userService.updateUserProfile(id, parsed.data);
+    const user = await this.userService.updateUserProfile(id, parsed.data);
     const dto = toUserPublicDto(user);
 
     return ResponseBuilder.Success({
@@ -70,16 +76,16 @@ export const userController = {
       data: dto,
       message: 'User updated',
     });
-  },
+  }
 
   async delete(c: AppContext) {
     const id = c.req.param('id');
 
-    await userService.deleteUser(id);
+    await this.userService.deleteUser(id);
     return ResponseBuilder.Success({
       c,
       data: null,
       message: 'User deleted',
     });
-  },
-};
+  }
+}
