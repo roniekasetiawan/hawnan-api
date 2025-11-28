@@ -1,0 +1,126 @@
+version: "3.9"
+
+networks:
+  public:
+  internal:
+
+services:
+  # ========== DATA LAYER PROD ==========
+  postgres:
+    image: postgres:16
+    container_name: prod_postgres
+    restart: unless-stopped
+    env_file:
+      - .env.prod.data
+    volumes:
+      - prod_pg_data:/var/lib/postgresql/data
+      - ../config/postgres/postgres.conf:/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "6G"
+
+  redis:
+    image: redis:7
+    container_name: prod_redis
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - prod_redis_data:/data
+      - ../config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.7"
+          memory: "1280M"
+
+  minio:
+    image: minio/minio:latest
+    container_name: prod_minio
+    restart: unless-stopped
+    env_file:
+      - .env.prod.data
+    command: server /data --console-address ":9001"
+    volumes:
+      - prod_minio_data:/data
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.7"
+          memory: "1280M"
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: prod_loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - prod_loki_data:/loki
+      - ../config/loki/config.yml:/etc/loki/config.yml
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.7"
+          memory: "1280M"
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: prod_grafana
+    restart: unless-stopped
+    env_file:
+      - .env.prod.data
+    volumes:
+      - prod_grafana_data:/var/lib/grafana
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
+  # ========== APP LAYER PROD ==========
+  api-prod:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: prod_api
+    restart: unless-stopped
+    env_file:
+      - .env.prod.app
+    environment:
+      - NODE_ENV=production
+      - APP_ENV=production
+    command: ["bun", "run", "dist/main.js"]
+    networks:
+      - internal
+      - public
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: "2560M"
+
+volumes:
+  prod_pg_data:
+  prod_redis_data:
+  prod_minio_data:
+  prod_loki_data:
+  prod_grafana_data:

@@ -1,0 +1,123 @@
+version: "3.9"
+
+services:
+  # ========== DATA LAYER DEV ==========
+  postgres:
+    image: postgres:16
+    container_name: dev_postgres
+    restart: unless-stopped
+    env_file:
+      - .env.dev.data
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev_pg_data:/var/lib/postgresql/data
+      - ../config/postgres/postgres.conf:/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: "3G"
+
+  redis:
+    image: redis:7
+    container_name: dev_redis
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - dev_redis_data:/data
+      - ../config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+
+  minio:
+    image: minio/minio:latest
+    container_name: dev_minio
+    restart: unless-stopped
+    env_file:
+      - .env.dev.data
+    command: server /data --console-address ":9001"
+    volumes:
+      - dev_minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: dev_loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - dev_loki_data:/loki
+      - ../config/loki/config.yml:/etc/loki/config.yml
+    ports:
+      - "3100:3100"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: dev_grafana
+    restart: unless-stopped
+    env_file:
+      - .env.dev.data
+    volumes:
+      - dev_grafana_data:/var/lib/grafana
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
+  # ========== APP LAYER DEV ==========
+  api-dev:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: dev_api
+    restart: unless-stopped
+    env_file:
+      - .env.dev.app
+    environment:
+      - APP_ENV=development
+      - NODE_ENV=development
+    command: ["bun", "run", "dist/main.js"]
+    ports:
+      - "8080:8080" # expose dev API
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - loki
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1280M"
+
+volumes:
+  dev_pg_data:
+  dev_redis_data:
+  dev_minio_data:
+  dev_loki_data:
+  dev_grafana_data:

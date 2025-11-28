@@ -9,7 +9,7 @@ export function createApp() {
 
   app.use('*', requestLogger());
 
-  app.get('/health', c => c.json({ status: 'ok', uptime: process.uptime() }));
+  app.get('/health', c => c.json({ status: 'okS', uptime: process.uptime() }));
 
   registerRoutes(app);
   registerErrorHandler(app);

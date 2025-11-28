@@ -1,0 +1,125 @@
+version: "3.9"
+
+services:
+  # ========== DATA LAYER LOCAL ==========
+  postgres:
+    image: postgres:16
+    container_name: local_postgres
+    restart: unless-stopped
+    env_file:
+      - .env.local.data
+    ports:
+      - "5432:5432"
+    volumes:
+      - local_pg_data:/var/lib/postgresql/data
+      - ../config/postgres/postgres.conf:/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: "3G"
+
+  redis:
+    image: redis:7
+    container_name: local_redis
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - local_redis_data:/data
+      - ../config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
+  minio:
+    image: minio/minio:latest
+    container_name: local_minio
+    restart: unless-stopped
+    env_file:
+      - .env.local.data
+    command: server /data --console-address ":9001"
+    volumes:
+      - local_minio_data:/data
+      - ../config/minio/config.json:/root/.minio/config.json
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: local_loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - local_loki_data:/loki
+      - ../config/loki/config.yml:/etc/loki/config.yml
+    ports:
+      - "3100:3100"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "1G"
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: local_grafana
+    restart: unless-stopped
+    env_file:
+      - .env.local.data
+    volumes:
+      - local_grafana_data:/var/lib/grafana
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/provisioning:/etc/grafana/provisioning
+      - ../config/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+
+  # ========== APP LAYER LOCAL ==========
+  api-local:
+    image: oven/bun:1
+    container_name: local_api
+    working_dir: /app
+    restart: unless-stopped
+    env_file:
+      - .env.local.app
+    environment:
+      - APP_ENV=local
+      - NODE_ENV=development
+    volumes:
+      - ../..:/app
+    command: ["bun", "run", "src/main.ts"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - loki
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1280M"
+
+volumes:
+  local_pg_data:
+  local_redis_data:
+  local_minio_data:
+  local_loki_data:
+  local_grafana_data:

@@ -16,3 +16,12 @@ yarn-error.log*
 /src/generated/prisma
 projects
 .idx/.data/
+
+infra/dev/.env.dev.*
+infra/local/.env.local.*
+infra/prod/.env.prod.*
+
+# tapi keep *.example di repo
+!infra/dev/.env.dev.*.example
+!infra/local/.env.local.*.example
+!infra/prod/.env.prod.*.example

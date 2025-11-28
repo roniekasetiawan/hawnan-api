@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "logger": {
+    "console": {
+      "enabled": true
+    },
+    "file": {
+      "enabled": false,
+      "filename": ""
+    }
+  },
+  "region": "us-east-1",
+  "browser": "on",
+  "notify": {},
+  "heal": {
+    "delay": "0s"
+  }
+}

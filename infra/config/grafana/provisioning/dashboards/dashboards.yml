@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Loki Dashboards
+    orgId: 1
+    folder: Logs
+    options:
+      path: /var/lib/grafana/dashboards/loki
+    type: file
+    disableDeletion: false
+    editable: true

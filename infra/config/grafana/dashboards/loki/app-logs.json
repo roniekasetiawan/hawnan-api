@@ -1,0 +1,62 @@
+{
+  "id": null,
+  "uid": "logs-app",
+  "title": "Application Logs",
+  "tags": ["logs","loki"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+
+  "templating": {
+    "list": [
+      {
+        "name": "app",
+        "type": "query",
+        "label": "App",
+        "datasource": { "type": "loki", "uid": "loki-logs" },
+        "definition": "label_values({app!=\"\"}, app)",
+        "query": {
+          "query": "label_values({app!=\"\"}, app)",
+          "refId": "LogQuery"
+        },
+        "current": { "selected": true, "text": "gateway", "value": "gateway" },
+        "refresh": 2
+      }
+    ]
+  },
+
+  "panels": [
+    {
+      "id": 1,
+      "type": "logs",
+      "title": "App Logs",
+      "gridPos": { "h": 15, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "loki-logs" },
+          "expr": "{app=\"$app\"}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Log Volume by Level",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 15 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "loki-logs" },
+          "expr": "sum by (level) (count_over_time({app=\"$app\"}[$__interval]))"
+        }
+      ]
+    }
+  ]
+}
