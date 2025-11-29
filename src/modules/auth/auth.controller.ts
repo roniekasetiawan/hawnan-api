@@ -1,31 +1,17 @@
 import type { Context } from 'hono';
-import { zValidator } from '@hono/zod-validator';
-import { loginSchema } from './auth.schema';
 import { AuthService } from './auth.service';
 import { ResponseBuilder } from '@/core/http/response';
 import { AppEnv } from '@/app';
+import type { LoginInput } from '@/modules/auth/auth.schema';
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   login = async (c: Context<AppEnv>) => {
-    const body = await c.req.json();
-    const validator = zValidator('json', loginSchema);
-    const validationResult = await validator.validate(c, () => {});
-
-    if (validationResult.ok === false) {
-      return ResponseBuilder.Error({
-        c,
-        message: 'Invalid request body',
-        data: validationResult.error.flatten(),
-        status: 400,
-      });
-    }
-
-    const { email, password } = body;
+    const body = c.req.valid('json' as never) as LoginInput;
 
     try {
-      const result = await this.authService.login({ email, password });
+      const result = await this.authService.login(body);
       return ResponseBuilder.Success({
         c,
         data: result,

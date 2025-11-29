@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { AuthController } from '../auth.controller';
 import type { AppEnv } from '@/app/index';
+import { zValidator } from '@hono/zod-validator';
+import { loginSchema } from '../auth.schema';
 
 export class AuthRoute {
   public routes: Hono<AppEnv>;
@@ -11,6 +13,10 @@ export class AuthRoute {
   }
 
   private setupRoutes() {
-    this.routes.post('/login', this.authController.login);
+    this.routes.post(
+      '/login',
+      zValidator('json', loginSchema),
+      this.authController.login,
+    );
   }
 }

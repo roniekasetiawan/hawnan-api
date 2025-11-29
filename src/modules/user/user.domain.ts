@@ -1,8 +1,10 @@
 import type { CreateUserInput, UpdateUserInput } from '@/modules/user/user.schema';
+import bcrypt from 'bcryptjs';
 
 export type UserDomainProps = {
   email: string;
   name: string | null;
+  password?: string;
 };
 
 export function normalizeEmail(email: string): string {
@@ -15,17 +17,21 @@ export function normalizeName(name?: string | null): string | null {
   return trimmed === '' ? null : trimmed;
 }
 
-export function buildNewUserProps(input: CreateUserInput): UserDomainProps {
+export function buildNewUserProps(input: CreateUserInput) {
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(input.password, salt);
+
   return {
     email: normalizeEmail(input.email),
     name: normalizeName(input.name),
+    password: hashedPassword,
   };
 }
 
 export function applyUserProfileUpdate(
   current: UserDomainProps,
   input: UpdateUserInput,
-): UserDomainProps {
+): Omit<UserDomainProps, 'password'> {
   return {
     email: input.email ? normalizeEmail(input.email) : current.email,
     name: input.name !== undefined ? normalizeName(input.name) : current.name,

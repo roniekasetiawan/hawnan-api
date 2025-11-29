@@ -56,24 +56,25 @@ describe('User Domain', () => {
       const input: CreateUserInput = {
         email: '  TEST@EXAMPLE.COM  ',
         name: '  John Doe  ',
+        password: 'password123',
       };
-      const expected: UserDomainProps = {
-        email: 'test@example.com',
-        name: 'John Doe',
-      };
-      expect(buildNewUserProps(input)).toEqual(expected);
+      const result = buildNewUserProps(input);
+      expect(result.email).toBe('test@example.com');
+      expect(result.name).toBe('John Doe');
+      expect(result.password).toBeString();
+      expect(result.password).not.toBe('password123');
     });
 
     it('should handle null name', () => {
       const input: CreateUserInput = {
         email: 'test@example.com',
         name: null,
+        password: 'password123',
       };
-      const expected: UserDomainProps = {
-        email: 'test@example.com',
-        name: null,
-      };
-      expect(buildNewUserProps(input)).toEqual(expected);
+      const result = buildNewUserProps(input);
+      expect(result.email).toBe('test@example.com');
+      expect(result.name).toBeNull();
+      expect(result.password).toBeString();
     });
   });
 

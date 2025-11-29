@@ -1,4 +1,3 @@
-import { prisma } from '@/config/prisma';
 import { PrismaClient } from '@/generated/prisma';
 import type { UserDomainProps } from '@/modules/user/user.domain';
 

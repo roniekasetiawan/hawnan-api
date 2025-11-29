@@ -28,4 +28,8 @@ export const env = {
     secretKey: process.env.MINIO_SECRET_KEY ?? 'minioadmin123',
     bucket: process.env.MINIO_BUCKET ?? 'uploads',
   },
+  jwt: {
+    secret: process.env.JWT_SECRET ?? 'a-very-secure-secret-you-should-change',
+    expiresIn: process.env.JWT_EXPIRES_IN ?? '3600', // 1 hour in seconds
+  },
 }
