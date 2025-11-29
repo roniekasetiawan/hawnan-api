@@ -1,11 +1,22 @@
+import { LokiClient } from '@/utils/loki/loki';
 import { getCaller, type Caller } from '../caller';
-import { LogLevel, type Config, type Logger } from '../logger';
+import {
+  DebugParams,
+  ErrorParams,
+  InfoParams,
+  LogLevel,
+  WarnParams,
+  type Config,
+  type Logger,
+} from '../logger';
 
 export class ConsoleLogger implements Logger {
   private config: Config;
+  private loki?: LokiClient;
 
-  constructor(config: Config) {
+  constructor({ config, loki }: { config: Config; loki?: LokiClient }) {
     this.config = config;
+    this.loki = loki;
   }
 
   private fmt({
@@ -27,61 +38,46 @@ export class ConsoleLogger implements Logger {
     });
   }
 
-  async info({
-    tag,
-    message,
-    err = new Error(),
-  }: {
-    tag?: string;
-    message?: string;
-    err?: Error;
-  }) {
+  async info({ tag, message, err = new Error(), storage = { loki: true } }: InfoParams) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.INFO))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.INFO, message, caller: await getCaller(err) }));
+
+    const msg = this.fmt({ tag, level: LogLevel.INFO, message, caller: await getCaller(err) });
+    console.log(msg);
+    if (storage?.loki) {
+      this.loki?.send(msg, { level: LogLevel.INFO });
+    }
   }
 
-  async error({
-    tag,
-    message,
-    err  = new Error(),
-  }: {
-    tag?: string;
-    message?: string;
-    err?: Error;
-  }) {
+  async error({ tag, message, err = new Error(), storage = { loki: true } }: ErrorParams) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.ERROR))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.ERROR, message, caller: await getCaller(err) }));
+    const msg = this.fmt({ tag, level: LogLevel.ERROR, message, caller: await getCaller(err) });
+    console.log(msg);
+    if (storage?.loki) {
+      this.loki?.send(msg, { level: LogLevel.ERROR });
+    }
   }
-  async debug({
-    tag,
-    message,
-    err = new Error(),
-  }: {
-    tag?: string;
-    message?: string;
-    err?: Error;
-  }) {
+  async debug({ tag, message, err = new Error(), storage = { loki: true } }: DebugParams) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.DEBUG))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.DEBUG, message, caller: await getCaller(err) }));
+    const msg = this.fmt({ tag, level: LogLevel.DEBUG, message, caller: await getCaller(err) });
+    console.log(msg);
+    if (storage?.loki) {
+      this.loki?.send(msg, { level: LogLevel.DEBUG });
+    }
   }
-  async warn({
-    tag,
-    message,
-    err = new Error(),
-  }: {
-    tag?: string;
-    message?: string;
-    err?: Error;
-  }) {
+  async warn({ tag, message, err = new Error(), storage = { loki: true } }: WarnParams) {
     if (this.config.levels.length > 0 && !this.config.levels.includes(String(LogLevel.WARN))) {
       return;
     }
-    console.log(this.fmt({ tag, level: LogLevel.WARN, message, caller: await getCaller(err) }));
+    const msg = this.fmt({ tag, level: LogLevel.WARN, message, caller: await getCaller(err) });
+    console.log(msg);
+    if (storage?.loki) {
+      this.loki?.send(msg, { level: LogLevel.WARN });
+    }
   }
 }
