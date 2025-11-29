@@ -1,0 +1,9 @@
+FROM oven/bun:1
+
+WORKDIR /app
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["sh", "-c", "cd /app && bun install && bunx prisma generate && bunx prisma migrate deploy && bun run src/main.ts"]

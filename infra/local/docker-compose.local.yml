@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ========== DATA LAYER LOCAL ==========
   postgres:
@@ -9,7 +7,7 @@ services:
     env_file:
       - .env.local.data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - local_pg_data:/var/lib/postgresql/data
       - ../config/postgres/postgres.conf:/etc/postgresql/postgresql.conf
@@ -80,7 +78,6 @@ services:
     volumes:
       - local_grafana_data:/var/lib/grafana
       - ../config/grafana/provisioning:/etc/grafana/provisioning
-      - ../config/grafana/provisioning:/etc/grafana/provisioning
       - ../config/grafana/dashboards:/var/lib/grafana/dashboards
     ports:
       - "3000:3000"
@@ -92,18 +89,16 @@ services:
 
   # ========== APP LAYER LOCAL ==========
   api-local:
-    image: oven/bun:1
+    build:
+      context: ../..
+      dockerfile: infra/local/Dockerfile.api-local
     container_name: local_api
     working_dir: /app
     restart: unless-stopped
     env_file:
       - .env.local.app
-    environment:
-      - APP_ENV=local
-      - NODE_ENV=development
     volumes:
       - ../..:/app
-    command: ["bun", "run", "src/main.ts"]
     ports:
       - "8080:8080"
     depends_on:
