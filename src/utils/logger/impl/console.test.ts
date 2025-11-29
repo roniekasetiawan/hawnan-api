@@ -1,6 +1,6 @@
 import { LokiConfig } from '@/config/loki';
 import { ConsoleLogger } from '@/utils/logger/impl/console';
-import { LogFormat, Config } from '@/utils/logger/logger';
+import { LogFormat } from '@/utils/logger/logger';
 import { LokiClient } from '@/utils/loki/loki';
 import { vi, describe, test, expect, beforeEach } from 'bun:test';
 

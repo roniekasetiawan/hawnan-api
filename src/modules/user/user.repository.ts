@@ -4,8 +4,13 @@ import type { UserDomainProps } from '@/modules/user/user.domain';
 
 export class UserRepository {
   private db: PrismaClient;
-  constructor(db: PrismaClient) {
+  
+  constructor({ db }: { db: PrismaClient }) {
     this.db = db;
+  }
+
+  withTx({ tx }: { tx: PrismaClient }) {
+    return new UserRepository({ db: tx });
   }
 
   findAll() {

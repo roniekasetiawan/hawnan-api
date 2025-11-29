@@ -3,12 +3,15 @@ import { createUserSchema, updateUserSchema } from '@/modules/user/user.schema';
 import { UserService } from '@/modules/user/user.service';
 import { ResponseBuilder } from '@/core/http/response';
 import { toUserPublicDto, toUserPublicList } from '@/modules/user/user.presenter';
+import { Logger } from '@/utils/logger/logger';
 
 export class UserController {
   private userService: UserService;
+  private log: Logger;
 
-  constructor({ userService }: { userService: UserService }) {
+  constructor({ userService, log }: { userService: UserService; log: Logger }) {
     this.userService = userService;
+    this.log = log;
   }
 
   async getAll(c: AppContext) {

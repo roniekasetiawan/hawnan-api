@@ -4,8 +4,9 @@ import type { AppEnv } from '@/app';
 import { AppError } from '@/core/errors/app-error';
 import { ResponseBuilder } from '@/core/http/response';
 import { ContentfulStatusCode } from 'hono/utils/http-status';
+import { Logger } from '@/utils/logger/logger';
 
-export function registerErrorHandler(app: Hono<AppEnv>) {
+export function registerErrorHandler({ app, log }: { app: Hono<AppEnv>; log: Logger }) {
   app.onError((err, c) => {
     if (err instanceof AppError) {
       console.error('[AppError]', {

@@ -7,21 +7,22 @@ import { UserRepository } from '@/modules/user/user.repository';
 import { UserService } from '@/modules/user/user.service';
 import { UserController } from '@/modules/user/user.controller';
 import { prisma } from '@/config/prisma';
+import { Logger } from '@/utils/logger/logger';
 
-export function registerRoutes(app: Hono<AppEnv>) {
+export function registerRoutes({ app, log }: { app: Hono<AppEnv>; log: Logger }) {
   // REPOSITORY
-  const userRepository = new UserRepository(prisma);
+  const userRepository = new UserRepository({db: prisma});
   // SERVICE
-  const userService = new UserService({ userRepository });
+  const userService = new UserService({ userRepository,log });
   // CONTROLLER
-  const userController = new UserController({ userService });
-  
+  const userController = new UserController({ userService, log });
+
   // ROUTES
   const userRoutes = new UserRoute({ userController });
-  
+
   const publicRoutes = new Hono<AppEnv>();
   publicRoutes.route('/core', pingRoutes);
-  
+
   const privateRoutes = new Hono<AppEnv>();
   privateRoutes.use('*', authMiddleware);
   privateRoutes.route('/users', userRoutes.routes());

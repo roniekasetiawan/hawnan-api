@@ -4,6 +4,7 @@ import { loggerRAW } from '@/config/logger';
 import { HeaderKeys } from '@/utils/headers/keys';
 import { HeaderValues } from '@/utils/headers/values';
 import { CtxKeys } from '@/utils/ctx/keys';
+import { Logger } from '@/utils/logger/logger';
 
 const TAG = 'logger-middleware';
 
@@ -29,7 +30,7 @@ const getBody = async (r: Request | Response) => {
   }
 };
 
-export const requestLogger = (): MiddlewareHandler => {
+export const requestLogger = ({ log }: { log: Logger }): MiddlewareHandler => {
   return async (c, next) => {
     const id = nanoid(10);
     c.set(CtxKeys.REQUEST_ID, id);
@@ -44,7 +45,7 @@ export const requestLogger = (): MiddlewareHandler => {
       headers: c.req.header(),
       body: await getBody(c.req.raw),
     };
-    loggerRAW.info({ tag: TAG, message: JSON.stringify(reqLog) });
+    log.info({ tag: TAG, message: JSON.stringify(reqLog) });
 
     await next();
 
@@ -62,6 +63,6 @@ export const requestLogger = (): MiddlewareHandler => {
       headers: resHeaders,
       body: await getBody(c.res),
     };
-    loggerRAW.info({ tag: TAG, message: JSON.stringify(resLog) });
+    log.info({ tag: TAG, message: JSON.stringify(resLog) });
   };
 };
