@@ -6,12 +6,15 @@ import {
   buildNewUserProps,
   normalizeEmail,
 } from '@/modules/user/user.domain';
+import { Logger } from '@/utils/logger/logger';
 
 export class UserService {
   private userRepository: UserRepository;
+  private log: Logger;
 
-  constructor({ userRepository }: { userRepository: UserRepository }) {
+  constructor({ userRepository, log }: { userRepository: UserRepository; log: Logger }) {
     this.userRepository = userRepository;
+    this.log = log;
   }
 
   async listUsers() {

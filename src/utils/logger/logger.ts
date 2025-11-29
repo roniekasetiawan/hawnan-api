@@ -1,3 +1,4 @@
+import { LokiConfig } from '@/config/loki';
 import { ConsoleLogger } from '@/utils/logger/impl/console';
 
 export interface InfoParams {
@@ -35,6 +36,9 @@ export interface Logger {
 export interface Config {
   levels: string[];
   format: LogFormat;
+  storage?: {
+    loki?: LokiConfig
+  }
 }
 
 export enum LogFormat {
@@ -53,7 +57,13 @@ export enum LogImpls {
   CONSOLE = 'console',
 }
 
-export function InitLogger({ impl, config }: { impl: LogImpls; config: Config }): Logger {
+
+export interface LoggerParams {
+  impl: LogImpls;
+  config: Config;
+}
+
+export function InitLogger({ impl, config }: LoggerParams): Logger {
   switch (impl) {
     case LogImpls.CONSOLE:
       return new ConsoleLogger({ config });
