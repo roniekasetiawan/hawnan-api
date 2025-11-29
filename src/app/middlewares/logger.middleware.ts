@@ -1,6 +1,9 @@
 import type { MiddlewareHandler } from 'hono';
 import { nanoid } from 'nanoid';
 import { loggerRAW } from '@/config/logger';
+import { HeaderKeys } from '@/utils/headers/keys';
+import { HeaderValues } from '@/utils/headers/values';
+import { CtxKeys } from '@/utils/ctx/keys';
 
 const TAG = 'logger-middleware';
 
@@ -9,15 +12,16 @@ const getBody = async (r: Request | Response) => {
     return undefined;
   }
 
-  const contentType = r.headers.get('content-type');
+  const contentType = r.headers.get(HeaderKeys.CONTENT_TYPE);
   try {
     const clone = r.clone();
-    if (contentType?.includes('application/json')) {
+    if (contentType?.includes(HeaderValues.JSON)) {
       return await clone.json();
     }
-    if (contentType?.includes('text')) {
+    if (contentType?.includes(HeaderValues.TEXT)) {
       return await clone.text();
     }
+
     return `Body not parsed for content-type: ${contentType}`;
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Unknown error';
@@ -28,7 +32,7 @@ const getBody = async (r: Request | Response) => {
 export const requestLogger = (): MiddlewareHandler => {
   return async (c, next) => {
     const id = nanoid(10);
-    c.set('requestId', id);
+    c.set(CtxKeys.REQUEST_ID, id);
     const start = Date.now();
 
     const reqLog = {
