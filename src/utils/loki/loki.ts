@@ -1,4 +1,6 @@
 import type { LokiConfig } from '@/config/loki';
+import { HeaderKeys } from '@/utils/headers/keys';
+import { HeaderValues } from '@/utils/headers/values';
 
 // The structure Loki expects for a log stream
 interface LokiStream {
@@ -42,7 +44,7 @@ export class LokiClient implements ILokiClient {
       const response = await fetch(`${this.config.url}/loki/api/v1/push`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          [HeaderKeys.CONTENT_TYPE]: HeaderValues.JSON,
         },
         body: JSON.stringify(body),
       });
